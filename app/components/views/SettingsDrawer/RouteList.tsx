@@ -103,6 +103,11 @@ const getPaths = (remote: boolean): ButtonData[] => [
         icon: 'sound',
     },
     {
+        name: 'Voice',
+        path: '/screens/VoiceManagerScreen',
+        icon: 'customer-service',
+    },
+    {
         name: 'Logs',
         path: '/screens/LogsScreen',
         icon: 'code',

@@ -43,6 +43,14 @@ const ChatOptions = () => {
                     label: 'Chat History',
                     icon: 'paper-clip',
                 },
+                {
+                    onPress: (close) => {
+                        close()
+                        router.push('/screens/LiveScreen')
+                    },
+                    label: 'Live Voice',
+                    icon: 'sound',
+                },
             ]}
             placement="top">
             <Ionicons name="caret-up" style={styles.optionsButton} size={24} />

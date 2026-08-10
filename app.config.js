@@ -90,6 +90,15 @@ module.exports = {
                 },
             ],
             ['expo-sqlite', { withSQLiteVecExtension: true }],
+            [
+                'expo-speech-recognition',
+                {
+                    microphonePermission: 'Allow ChatterUI to use the microphone',
+                    speechRecognitionPermission: 'Allow ChatterUI to use speech recognition',
+                    androidSpeechServicePackages: ['com.google.android.googlequicksearchbox'],
+                },
+            ],
+            ['expo-audio', { microphonePermission: 'Allow ChatterUI to use the microphone' }],
             'expo-localization',
             'expo-router',
             'expo-font',

@@ -10,6 +10,7 @@ export enum Storage {
     Logs = 'logstate-storage',
     Samplers = 'samplerstate-storage',
     TTS = 'tts-data-storage',
+    Voice = 'voice-data-storage',
     ColorState = 'colorscheme-storage',
     TagHider = 'tag-hider-storage',
     CharacterSearch = 'storage-character-search',

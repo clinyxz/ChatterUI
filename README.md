@@ -38,6 +38,7 @@ Personalize Yourself
 -   Create and manage multiple chats per character.
 -   Customize Sampler fields and Instruct formatting
 -   Integrates with your device’s text-to-speech (TTS) engine
+-   Hands-free Live Mode: talk to any API with speech input and spoken replies
 
 <br/>
 
@@ -91,6 +92,22 @@ _These should be compliant with any Text Completion/Chat Completion backends suc
 Is your API provider missing? ChatterUI allows you to define APIs using its template system.
 
 Read more about it [here!](https://github.com/Vali-98/ChatterUI/discussions/126)
+
+## Live Mode
+
+Live Mode turns any configured API into a voice assistant: your speech is transcribed, sent to the
+active API, and the streamed reply is spoken back sentence by sentence. Open a chat, then select
+`Live Voice` from the chat input menu.
+
+Providers are configured under `Settings > Voice`:
+
+-   Speech input: the device recognizer (offline capable, no key) or any OpenAI-compatible
+    transcription endpoint, such as OpenRouter's `/api/v1/audio/transcriptions` with Whisper.
+-   Speech output: the device TTS engine, ElevenLabs, or MiniMax T2A.
+-   `Allow Interruptions` keeps the microphone open while the reply is spoken so it can be cut off
+    mid sentence. Headphones are recommended, as speakers may cause the microphone to hear the reply.
+
+All keys are stored on device and are only sent to the provider you configure.
 
 ## Development
 

@@ -3,11 +3,13 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { useShallow } from 'zustand/react/shallow'
 
+import { SpeechEngine } from '@lib/engine/Voice/SpeechEngine'
 import { Storage } from '@lib/enums/Storage'
 import { Logger } from '@lib/state/Logger'
 import { createMMKVStorage } from '@lib/storage/MMKV'
 
 import { Chats, useInference } from './Chat'
+import { useVoiceStore } from './Voice'
 
 type TTSState = {
     activeChatIndex?: number
@@ -125,12 +127,12 @@ export const useTTSStore = create<TTSState>()(
                 const currentSpeaker = get().voice
 
                 Logger.info('Starting TTS')
-                if (currentSpeaker === undefined) {
+                if (useVoiceStore.getState().ttsProvider === 'device' && !currentSpeaker) {
                     Logger.errorToast(`No Speaker Chosen`)
                     clearIndex()
                     return
                 }
-                if (await Speech.isSpeakingAsync()) await Speech.stop()
+                if (SpeechEngine.isSpeaking()) await SpeechEngine.stop()
                 const filter = /([。…！？、!?.,*"])/
                 const filteredchunks: string[] = []
                 const chunks = text.split(filter)
@@ -148,14 +150,13 @@ export const useTTSStore = create<TTSState>()(
                 Logger.debug('TTS started with ' + cleanedchunks.length + ' chunks')
                 set({ activeChatIndex: index })
                 cleanedchunks.forEach((chunk, index) =>
-                    Speech.speak(chunk, {
-                        language: currentSpeaker?.language,
-                        voice: currentSpeaker?.identifier,
+                    SpeechEngine.speak(chunk, {
+                        voice: currentSpeaker,
+                        rate: get().rate,
                         onDone: () => {
                             index === cleanedchunks.length - 1 && clearIndex()
                         },
                         onStopped: () => clearIndex(),
-                        rate: get().rate,
                     })
                 )
                 if (cleanedchunks.length === 0) clearIndex()
@@ -163,7 +164,7 @@ export const useTTSStore = create<TTSState>()(
             stopTTS: async () => {
                 Logger.info('TTS stopped')
                 set({ buffer: '', activeChatIndex: undefined, pauseLive: get().liveTTS })
-                await Speech.stop()
+                await SpeechEngine.stop()
             },
             setEnabled: (b: boolean) => {
                 set({ enabled: b })
@@ -184,13 +185,11 @@ export const useTTSStore = create<TTSState>()(
                 set({ pauseLive: b })
             },
             speak: (text, onDone = () => {}, onStop = () => {}) => {
-                const currentSpeaker = get().voice
-                Speech.speak(text, {
-                    language: currentSpeaker?.language,
-                    voice: currentSpeaker?.identifier,
+                SpeechEngine.speak(text, {
+                    voice: get().voice,
+                    rate: get().rate,
                     onDone: onDone,
                     onStopped: onStop,
-                    rate: get().rate,
                 })
             },
 
@@ -206,7 +205,7 @@ export const useTTSStore = create<TTSState>()(
 
             handleStartGeneration: async (lastIndex) => {
                 if (get().enabled && get().liveTTS) {
-                    await Speech.stop()
+                    await SpeechEngine.stop()
                     set({ activeChatIndex: lastIndex })
                 }
                 set({ pauseLive: false })
