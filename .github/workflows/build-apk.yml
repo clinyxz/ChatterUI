@@ -1,0 +1,63 @@
+name: Build APK
+
+on:
+    workflow_dispatch:
+        inputs:
+            variant:
+                description: 'Build variant'
+                type: choice
+                default: release
+                options:
+                    - release
+                    - debug
+    push:
+        branches:
+            - 'devin/**'
+        paths-ignore:
+            - 'README.md'
+            - '.github/ISSUE_TEMPLATE/*'
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        timeout-minutes: 120
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: '20.19.4'
+                  cache: npm
+
+            - uses: actions/setup-java@v4
+              with:
+                  java-version: '17'
+                  distribution: temurin
+
+            - uses: android-actions/setup-android@v3
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Prebuild android project
+              run: npx expo prebuild --platform android --no-install
+
+            - name: Free disk space
+              run: |
+                  sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost "$AGENT_TOOLSDIRECTORY" || true
+
+            - name: Build APK
+              working-directory: android
+              run: |
+                  VARIANT="${{ inputs.variant || 'release' }}"
+                  if [ "$VARIANT" = "debug" ]; then
+                    ./gradlew assembleDebug --no-daemon
+                  else
+                    ./gradlew assembleRelease --no-daemon
+                  fi
+
+            - uses: actions/upload-artifact@v4
+              with:
+                  name: chatterui-apk
+                  path: android/app/build/outputs/apk/**/*.apk
+                  if-no-files-found: error
